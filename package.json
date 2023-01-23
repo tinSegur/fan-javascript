@@ -2,5 +2,8 @@
   "name": "fan-javascript",
   "version": "1.0.0",
   "dependencies": {
+    "chart.js": "^4.2.0",
+    "chartjs-chart-geo": "^4.1.2",
+    "d3-contour": "^4.0.2"
   }
 }
