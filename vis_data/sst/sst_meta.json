@@ -1,0 +1,1 @@
+{"long_name": "Daily sea surface temperature", "units": "Celsius", "valid_min": -300, "valid_max": 4500, "shape": [21, 1, 100, 160], "lat_minmax": {"min": -59.875, "max": -35.125}, "lon_minmax": {"min": 265.125, "max": 304.875}}

@@ -1,10 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.plot.ly/plotly-2.18.0.min.js"></script>
+    <script src="https://unpkg.com/topojson-client"></script>
+    <script src="js/geojson.min.js"></script>
 </head>
 <body>
-$END$
+<div id="tester" style="width:800px;height:700px;"></div>
+<script>
+    const sample = fetch("https://raw.githubusercontent.com/tinSegur/fan-javascript/master/plotly_test/sample2.json")
+        .then((r) => r.json());
+    console.log(sample)
+    const topology = fetch("https://raw.githubusercontent.com/tinSegur/fan-javascript/master/data/tp_2000-01-18_geo.json")
+        .then((r) => r.json())
+    console.log(topology)
+
+    TESTER = document.getElementById('tester');
+
+    Promise.all([sample, topology]).then( (foo) => {
+
+        var bam = foo[1]
+        foo = foo[0]
+
+        function arr_mult(arr, n){
+            var rarr = Array()
+            for (let i = 0; i<n;i++){
+                rarr = rarr.concat(arr)
+            }
+            return rarr
+        }
+
+        function inner_arr_mult(arr, n){
+            var rarr = Array()
+            for (let i = 0; i<arr.length; i++){
+                for (let l = 0; l<n;l++){
+                    rarr = rarr.concat(arr[i])
+                }
+            }
+            return rarr
+        }
+
+        function map_coords(val, ran1, ran2){
+            //maps a value val1 from the range ran1 linearly onto the range ran2
+            var slope = (ran2[1] - ran2[0])/(ran1[1] - ran1[0])
+            return (val-ran1[0])*slope+ran2[0]
+        }
+
+        function convert_coords_multipolygon(multi, xrange1, xrange2, yrange1, yrange2){
+            var ret_copy = multi
+            for (let i = 0; i < ret_copy.coordinates.length; i++){
+                for (let k = 0; k < ret_copy.coordinates[i].length; k++){
+                    ret_copy.coordinates[i][k] = ret_copy.coordinates[i][k].map((vl) => [
+                        map_coords(vl[0], xrange1, xrange2),
+                        map_coords(vl[1], yrange1, yrange2)])
+                }
+            }
+            return ret_copy
+        }
+
+        //var level = bam[1]
+        //console.log(bam.length)
+        //console.log(level.coordinates[0][0].map((vl) => [
+        //    map_coords(vl[0], [0, 161], [-95.0, -55.0]),
+        //   map_coords(vl[1], [0, 101], [-35.0, -60.0])]))
+        //console.log(convert_coords_multipolygon(level, [0, 161], [-95.0, -55.0], [0, 101], [-35.0, -60.0]))
+
+        var layer_obj = []
+        for (let j = 0; j<bam.length; j++){
+            layer_obj.push({
+                sourcetype: "geojson",
+                source: convert_coords_multipolygon(bam[j], [0, 161], [-95.0, -55.0], [0, 101], [-35.0, -60.0]),
+                type: "line",
+                color: "#"+(bam[j].value*100).toString(16)
+            })
+        }
+        console.log(layer_obj)
+
+        var data = [{
+            lon: arr_mult(foo.lon, 101),
+            lat: inner_arr_mult(foo.lat, 161),
+            z: foo.tp.flat(),
+            type: 'scattermapbox',
+            opacity:0.8,
+            radius:8,
+            reversescale: false,
+            marker: {
+                coloraxis: 'coloraxis',
+                color:foo.tp.flat(),
+            },
+            hovertext: foo.tp.flat()
+
+        }
+        ];
+
+
+        var layout = {
+
+            title: 'Geo Heatmap',
+            dragmode:'zoom',
+            /*geo: {
+                scope:'south america',
+                showcountries:true
+            },*/
+            mapbox: {
+                style:'open-street-map',
+                center: {
+                    lat:-48,
+                    lon:-73
+                },
+                layers: layer_obj
+            },
+            coloraxis: {colorscale: "Jet"}
+
+        }
+
+
+        Plotly.newPlot(TESTER, data, layout);
+
+    })
+
+
+
+</script>
+
 </body>
 </html>

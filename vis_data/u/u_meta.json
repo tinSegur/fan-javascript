@@ -1,0 +1,1 @@
+{"long_name": "Yearly average zonal wind speed", "units": "Metres per second", "shape": [20, 80, 120], "lat_minmax": {"min": -56.625, "max": -36.875}, "lon_minmax": {"min": 270.375, "max": 300.125}}
