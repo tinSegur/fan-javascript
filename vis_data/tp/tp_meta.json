@@ -1,0 +1,1 @@
+{"units": "m", "long_name": "Total precipitation", "shape": [21, 101, 161], "lat_interval": {"start": -35.0, "end": -60.0}, "lon_interval": {"start": -95.0, "end": -55.0}}
