@@ -1,1 +1,1 @@
-{"long_name": "Yearly average meridional wind speed", "units": "Metres per second", "shape": [20, 80, 120], "lat_minmax": {"min": -56.625, "max": -36.875}, "lon_minmax": {"min": 270.375, "max": 300.125}}
+{"long_name": "Yearly average meridional wind speed", "units": "Metres per second", "shape": [20, 80, 120], "lat_interval": {"start": -56.625, "end": -36.875}, "lon_interval": {"start": 270.375, "end": 300.125}}
