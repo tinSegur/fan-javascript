@@ -33,6 +33,12 @@ function generate_contours(vardir, varname, threshes){
 
     let data_arr = json_arr.map((json) => json[varname])
     let cnt_arr = data_arr.map((data) => cntgen(data.flat(4)))
+    cnt_arr = cnt_arr.map((conts) => (conts.map((geoj) => (convert_coords_multipolygon(geoj,
+        [0, lon_size],
+        [meta_json['lon_interval']['start'], meta_json['lon_interval']['end']],
+        [0, lat_size],
+        [meta_json['lat_interval']['start'], meta_json['lat_interval']['end']]
+        )))))
 
     for (let i = 0; i<cnt_arr.length; i++){
         let geo = cnt_arr[i]
@@ -41,8 +47,6 @@ function generate_contours(vardir, varname, threshes){
         })
 
     }
-
-
 
 }
 
