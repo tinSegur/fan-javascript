@@ -31,6 +31,8 @@
 
       const var_selector = document.getElementById("variable")
       const year_selector = document.getElementById("year")
+      GRAPH = document.getElementById('graph');
+      var myplot;
 
       function arr_mult(arr, n){
           var rarr = Array()
@@ -71,17 +73,24 @@
               let data = await fetch(`https://raw.githubusercontent.com/tinSegur/fan-javascript/master/vis_data/${varname}/${varname}_data/${varname}-mean-${year}.json`).then((r) => r.json())
               let geo = await fetch(`https://raw.githubusercontent.com/tinSegur/fan-javascript/master/vis_data/${varname}/${varname}_geo/${varname}-geo-${year}.json`).then((r) => r.json())
               vars_graph_data[varname][year-2000] = [data, geo]
+              console.log("Data insert")
+              console.log([data, geo])
               return [data, geo]
           }
           else {
+              console.log("Data retrieval")
+              console.log(vars_graph_data[varname][year-2000])
               return vars_graph_data[varname][year-2000]
           }
       }
 
-      async function update_graph(plot, varname, year){
-          let var_data, var_geo =  await nullOrFetchData(varname, year)
+      async function update_graph(){
+          let varname = var_selector.value
+          let year = year_selector.value
+          console.log([varname, year])
+          let [var_data, var_geo] =  await nullOrFetchData(varname, year)
 
-          let layer_update = {}
+          let layer_update = []
           for (let j = 0; j<var_geo.length; j++){
               layer_update.push({
                   sourcetype: "geojson",
@@ -93,12 +102,29 @@
           }
 
           let trace_update = {
-              lat: arr_mult(var_data.lat, var_data.lon.length),
-              lon: inner_arr_mult(var_data.lon, var_data.lat.length)
-              z: var_data.data
+              lat: [inner_arr_mult(var_data.lat, var_data.lon.length)],
+              lon: [arr_mult(var_data.lon, var_data.lat.length)],
+              z: [var_data.data],
+              type: 'scattermapbox',
+              opacity:0.8,
+              radius:8,
+              reversescale: false,
+              marker: {
+                  color:var_data.data,
+                  showscale:true,
+                  cmax: Math.max(...var_data.data),
+                  cmin: Math.min(...var_data.data)
+              },
+              hovertext: [var_data.data]
           }
 
           let layout_update = {
+              title: 'Geo Heatmap',
+              dragmode:'zoom',
+              /*geo: {
+                  scope:'south america',
+                  showcountries:true
+              },*/
               mapbox: {
                   style:'open-street-map',
                   center: {
@@ -106,9 +132,12 @@
                       lon:-73
                   },
                   layers: layer_update
+              },
+              coloraxis: {
+                  colorscale: "Jet"
               }
           }
-          plot.update(trace_update, layer_update)
+          Plotly.update(GRAPH, trace_update, layout_update)
       }
 
 
@@ -119,7 +148,7 @@
           v: Array.from(Array(21), (x, i) => null)
       }
 
-      const year_int = Array.from(Array(21), (x, i) => 2000+i)
+      /*const year_int = Array.from(Array(21), (x, i) => 2000+i)
       const sst_data = fetch_var_data('sst', year_int)
       const sst_geo = fetch_geo_data('sst', year_int)
 
@@ -153,80 +182,72 @@
               data: responses[6],
               geo: reponses[7]
           }
+              })*/
+
+      const init_data = nullOrFetchData(var_selector.value, year_selector.value)
+
+      /*const data = fetch("https://raw.githubusercontent.com/tinSegur/fan-javascript/master/vis_data/sst/sst_data/sst-mean-2000.json")
+                .then((r) => r.json());*/
+      /*const contours = fetch("https://raw.githubusercontent.com/tinSegur/fan-javascript/master/vis_data/sst/sst_geo/sst-geo-2000.json")
+                .then((r) => r.json())*/
 
 
+      Promise.all([init_data]).then( (draw_data) => {
+        var geo = draw_data[0][1]
+        var data = draw_data[0][0]
 
-              })
+        var layer_obj = []
+        for (let j = 0; j<geo.length; j++){
+          layer_obj.push({
+            sourcetype: "geojson",
+            source: geo[j],
+            type: "line",
+            //color: "#"+(bam[j].value*100).toString(16),
+            linewidth: 0.5
+          })
+        }
+        console.log(layer_obj)
 
-    const data = fetch("https://raw.githubusercontent.com/tinSegur/fan-javascript/master/vis_data/sst/sst_data/sst-mean-2000.json")
-            .then((r) => r.json());
-    console.log(data)
-    const contours = fetch("https://raw.githubusercontent.com/tinSegur/fan-javascript/master/vis_data/sst/sst_geo/sst-geo-2000.json")
-            .then((r) => r.json())
-    console.log(contours)
-
-    GRAPH = document.getElementById('graph');
-
-    Promise.all([data, contours]).then( (draw_data) => {
-
-      var geo = draw_data[1]
-      var data = draw_data[0]
-
-
-
-      var layer_obj = []
-      for (let j = 0; j<geo.length; j++){
-        layer_obj.push({
-          sourcetype: "geojson",
-          source: geo[j],
-          type: "line",
-          //color: "#"+(bam[j].value*100).toString(16),
-          linewidth: 0.5
-        })
-      }
-      console.log(layer_obj)
-
-      var data_obj = [{
-        lon: arr_mult(data.lon, 101),
-        lat: inner_arr_mult(data.lat, 161),
-        z: data.data.flat(4),
-        type: 'scattermapbox',
-        opacity:0.8,
-        radius:8,
-        reversescale: false,
-        marker: {
-          coloraxis: 'coloraxis',
-          color:data.data.flat(),
-        },
-        hovertext: data.data.flat()
-
-      }
-      ];
-
-
-      var layout = {
-
-        title: 'Geo Heatmap',
-        dragmode:'zoom',
-        /*geo: {
-            scope:'south america',
-            showcountries:true
-        },*/
-        mapbox: {
-          style:'open-street-map',
-          center: {
-            lat:-48,
-            lon:-73
+        var data_obj = [{
+          lon: arr_mult(data.lon, 101),
+          lat: inner_arr_mult(data.lat, 161),
+          z: data.data.flat(4),
+          type: 'scattermapbox',
+          opacity:0.8,
+          radius:8,
+          reversescale: false,
+          marker: {
+            coloraxis: 'coloraxis',
+            color:data.data.flat(),
           },
-          layers: layer_obj
-        },
-        coloraxis: {colorscale: "Jet"}
-
-      }
+          hovertext: data.data.flat()
+        }];
 
 
-      Plotly.newPlot(GRAPH, data_obj, layout);
-    })
+        var layout = {
+          title: 'Geo Heatmap',
+          dragmode:'zoom',
+          /*geo: {
+              scope:'south america',
+              showcountries:true
+          },*/
+          mapbox: {
+            style:'open-street-map',
+            center: {
+              lat:-48,
+              lon:-73
+            },
+            layers: layer_obj
+          },
+          coloraxis: {
+              colorscale: "Jet"
+          }
+        }
+
+        myplot = Plotly.newPlot(GRAPH, data_obj, layout);
+        var_selector.addEventListener("change", update_graph, false)
+        year_selector.addEventListener("change", update_graph, false)
+      })
   </script>
 
 </body>
