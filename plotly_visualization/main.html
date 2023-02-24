@@ -110,10 +110,8 @@
               radius:8,
               reversescale: false,
               marker: {
-                  color:var_data.data,
-                  showscale:true,
-                  cmax: Math.max(...var_data.data),
-                  cmin: Math.min(...var_data.data)
+                  color:var_data.data.flat(),
+                  colorscale: 'Jet'
               },
               hovertext: [var_data.data]
           }
@@ -132,12 +130,9 @@
                       lon:-73
                   },
                   layers: layer_update
-              },
-              coloraxis: {
-                  colorscale: "Jet"
               }
           }
-          Plotly.update(GRAPH, trace_update, layout_update)
+          Plotly.update(GRAPH, trace_update, layout_update, [0])
       }
 
 
@@ -217,8 +212,8 @@
           radius:8,
           reversescale: false,
           marker: {
-            coloraxis: 'coloraxis',
             color:data.data.flat(),
+            colorscale: 'Jet'
           },
           hovertext: data.data.flat()
         }];
@@ -238,9 +233,6 @@
               lon:-73
             },
             layers: layer_obj
-          },
-          coloraxis: {
-              colorscale: "Jet"
           }
         }
 
