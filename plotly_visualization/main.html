@@ -10,11 +10,12 @@
 </head>
 <body>
 <div class="parent">
+    <div class="inline-block-child" id="graph" style="width:600px;height:500px;"></div>
     <div class="inline-block-child" id="dropdowns">
         <select id="variable"></select>
         <select id="year"></select>
     </div>
-    <div class="inline-block-child" id="graph" style="width:600px;height:500px;"></div>
+
 </div>
   <script>
 
@@ -115,6 +116,7 @@
           let year = year_selector.value
           console.log([varname, year])
           let [var_data, var_geo] =  await nullOrFetchData(varname, year)
+          let meta = vars_meta_obj[varname]
 
           let layer_update = []
           for (let j = 0; j<var_geo.length; j++){
@@ -144,7 +146,7 @@
           }
 
           let layout_update = {
-              title: 'Geo Heatmap',
+              title: 'Visualizador de datos FAN <br> <sup>' + meta["long_name"] + ', ' + meta["units"] + ' - ' + year +  '</sup>',
               dragmode:'zoom',
               /*geo: {
                   scope:'south america',
@@ -181,6 +183,7 @@
           Promise.all([init_data]).then( (draw_data) => {
               var geo = draw_data[0][1]
               var data = draw_data[0][0]
+              var meta = vars_meta_obj[var_selector.value]
 
               var layer_obj = []
               for (let j = 0; j<geo.length; j++){
@@ -188,7 +191,6 @@
                       sourcetype: "geojson",
                       source: geo[j],
                       type: "line",
-                      //color: "#"+(bam[j].value*100).toString(16),
                       linewidth: 0.5
                   })
               }
@@ -212,7 +214,7 @@
 
 
               var layout = {
-                  title: 'Geo Heatmap',
+                  title: 'Visualizador de datos FAN <br> <sup>' + meta["long_name"] + ', ' + meta["units"] + ' - ' + data.year +  '</sup>',
                   dragmode:'zoom',
                   /*geo: {
                       scope:'south america',
