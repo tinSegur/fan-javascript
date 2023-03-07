@@ -3,7 +3,7 @@ Esta herramienta es una herramienta de visualización para los datos de FAN util
 
 ## Funcionamiento
 Esta herramienta utiliza plotly para su funcionamiento, y como tal está pensada para ser empotrada a través de un iframe. Funciona principalmente client-side, pero depende de un servidor que almacene una estructura de archivos a través de la cuál acceder a los datos. Esta estructura se debería poder modificar siempre y cuando se actualizen los regex correspondientes para el acceso.
-
+Los archivos html y CSS en sí están ubicados en la carpeta plotly_visualization.
 ### Estructura de archivos
 La estructura de archivos utilizada por la herramienta es la siguiente:
 ``` bash
