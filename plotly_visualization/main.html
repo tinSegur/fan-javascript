@@ -6,7 +6,6 @@
     <title>Title</title>
     <script src="https://cdn.plot.ly/plotly-2.18.0.min.js"></script>
     <script src="https://unpkg.com/topojson-client"></script>
-    <!--<script src="js/geojson.min.js"></script>-->
 </head>
 <body>
 <div class="parent">
@@ -45,15 +44,13 @@
           var_selector.innerHTML = html
       }
 
-      function update_year_select(){ //update de year select element with the corresponding year interval for a given variable
+      function update_year_select(){ //update thee year select element with the corresponding year interval for a given variable
           let html = ""
           let yinterval = vars_meta_obj[var_selector.value]["year_interval"]
           for (let i = 0; i<yinterval.length; i++){
-              html += "<option value=" + yinterval[i] + ">" + yinterval[i] + "</option>"
+              html += "<option value=" + Number(yinterval[i]) + ">" + yinterval[i] + "</option>"
           }
           year_selector.innerHTML = html
-
-
       }
 
       function fetch_meta_data(varname){ //fetches variable metadata
@@ -111,6 +108,8 @@
           }
       }
 
+
+
       async function update_graph(){ //updates the graph according to the values of the two select elements
           let varname = var_selector.value
           let year = year_selector.value
@@ -148,10 +147,6 @@
           let layout_update = {
               title: 'Visualizador de datos FAN <br> <sup>' + meta["long_name"] + ', ' + meta["units"] + ' - ' + year +  '</sup>',
               dragmode:'zoom',
-              /*geo: {
-                  scope:'south america',
-                  showcountries:true
-              },*/
               mapbox: {
                   style:'open-street-map',
                   center: {
@@ -165,22 +160,29 @@
       }
 
       async function setup(){ //sets up the graph
+          //first, fetch all the variable ids
           let vars = await fetch_from_root("index.json").then((r) => r.json())
           var_index.push(...vars)
 
+          //once received variable ids, populate the meta and data objects
           await Promise.all(var_index.map((v) => fetch_meta_data(v).then((r) => r.json()))).then((responses) => {
               for (let i = 0; i < responses.length; i++){
+                  console.log(responses[i])
                   vars_meta_obj[var_index[i]] = responses[i]
+                  vars_graph_data[var_index[i]] = Array.from(Array(responses[i]["year_interval"].length), (x, i) => null)
               }
+
+              //update the select elements with the fetched data
               update_var_select()
               update_year_select()
           })
 
           var myplot;
 
+          //fetch initial data
           const init_data = nullOrFetchData(var_selector.value, year_selector.value)
 
-          Promise.all([init_data]).then( (draw_data) => {
+          Promise.all([init_data]).then( (draw_data) => { //draw the initial graph and tie update functions to select elements
               var geo = draw_data[0][1]
               var data = draw_data[0][0]
               var meta = vars_meta_obj[var_selector.value]
