@@ -93,10 +93,10 @@
       }
 
       async function nullOrFetchData(varname, year){ //returns the variable data for a given year and variable. if the data has already been downloaded, returns that, otherwise it is downloaded
-          if (vars_graph_data[varname][year-2000] === null) {
+          if (vars_graph_data[varname][year] === null) {
               let data = await fetch(`https://raw.githubusercontent.com/tinSegur/fan-javascript/master/vis_data/${varname}/${varname}_data/${varname}-mean-${year}.json`).then((r) => r.json())
               let geo = await fetch(`https://raw.githubusercontent.com/tinSegur/fan-javascript/master/vis_data/${varname}/${varname}_geo/${varname}-geo-${year}.json`).then((r) => r.json())
-              vars_graph_data[varname][year-2000] = [data, geo]
+              vars_graph_data[varname][year] = [data, geo]
               console.log("Data insert")
               console.log([data, geo])
               return [data, geo]
@@ -169,7 +169,9 @@
               for (let i = 0; i < responses.length; i++){
                   console.log(responses[i])
                   vars_meta_obj[var_index[i]] = responses[i]
-                  vars_graph_data[var_index[i]] = Array.from(Array(responses[i]["year_interval"].length), (x, i) => null)
+                  //vars_graph_data[var_index[i]] = Array.from(Array(responses[i]["year_interval"].length), (x, i) => null)
+                  let entries = Array.from(Array(responses[i]["year_interval"].length), (x,j) => [responses[i]["year_interval"][j], null])
+                  vars_graph_data[var_index[i]] = Object.fromEntries(entries)
               }
 
               //update the select elements with the fetched data
